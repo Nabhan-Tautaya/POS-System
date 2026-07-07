@@ -1,5 +1,14 @@
 import app from "./app.js";
+import logger from "../config/logger.js";
 
-app.listen(3000, () => {
-  console.log("Backend running on port 3000");
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, (err) => {
+  if (err) {
+    logger.error(`Error starting server: ${err}`);
+    process.exit(1);
+  }
+  logger.info(`Backend running on port ${PORT}`);
 });
+
+export default app;

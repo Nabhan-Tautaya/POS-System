@@ -1,19 +1,6 @@
 import express from "express";
 import cors from "cors";
+import server from "./app/server.js";
+import app from "./app/app.js";
 
-const app = express();
-
-app.use(cors());
-app.use(express.json());
-
-app.get("/api/health", (req, res) => {
-  res.json({
-    status: "OK",
-  });
-});
-
-const PORT = 3000;
-
-app.listen(PORT, () => {
-  console.log(`Server running on ${PORT}`);
-});
+export default app;
