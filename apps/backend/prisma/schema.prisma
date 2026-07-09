@@ -1,7 +1,45 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider = "mysql"
 }
 
-generator client {
-  provider = "prisma-client-js"
+model organization {
+  id        String   @id @default(cuid())
+  name      String   @unique(map: "Organization_name_key")
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+  user      user[]
+}
+
+model role {
+  id          String   @id @default(cuid())
+  name        String   @unique(map: "Role_name_key")
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime
+  user        user[]
+}
+
+model user {
+  id             String       @id @default(cuid())
+  organizationId String
+  roleId         String
+  firstName      String
+  lastName       String
+  email          String       @unique(map: "User_email_key")
+  passwordHash   String
+  isActive       Boolean      @default(true)
+  lastLoginAt    DateTime?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime
+  organization   organization @relation(fields: [organizationId], references: [id], map: "User_organizationId_fkey")
+  role           role         @relation(fields: [roleId], references: [id], map: "User_roleId_fkey")
+
+  @@index([email], map: "User_email_idx")
+  @@index([organizationId], map: "User_organizationId_idx")
+  @@index([roleId], map: "User_roleId_idx")
 }

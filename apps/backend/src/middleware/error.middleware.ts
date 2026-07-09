@@ -1,24 +1,45 @@
-import type { Request, Response, NextFunction } from "express";
-import { ApiError } from "../shared/errors/ApiErrors.js";
+import type { NextFunction, Request, Response } from "express";
+
+import { AppError } from "../shared/errors/app.error.js";
+import { env } from "../config/env.js";
 import logger from "../config/logger.js";
 
-export const errorHandler = (
-  err: Error,
+export function errorMiddleware(
+  error: Error,
   req: Request,
   res: Response,
   next: NextFunction,
-) => {
-  logger.error(err);
+) {
+  logger.error({
+    name: error.name,
+    message: error.message,
+    stack: error.stack,
+    method: req.method,
+    url: req.originalUrl,
+  });
 
-  if (err instanceof ApiError) {
-    return res.status(err.statusCode).json({
+  if (error instanceof AppError) {
+    return res.status(error.statusCode).json({
       success: false,
-      message: err.message,
+      error: {
+        type: error.name,
+        message: error.message,
+      },
     });
   }
 
-  return res.status(500).json({
+  const response: any = {
     success: false,
-    message: "Internal Server Error",
-  });
-};
+    error: {
+      type: "InternalServerError",
+      message: "Something went wrong.",
+    },
+  };
+
+  if (env.NODE_ENV === "development") {
+    response.error.message = error.message;
+    response.error.stack = error.stack;
+  }
+
+  return res.status(500).json(response);
+}

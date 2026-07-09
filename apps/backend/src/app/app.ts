@@ -1,16 +1,14 @@
 import express from "express";
 import cors from "cors";
+import routes from "../routes/index.js";
+
 import { requestLogger } from "../middleware/requestLogger.middleware.js";
+import { errorMiddleware } from "../middleware/error.middleware.js";
+import { notFoundMiddleware } from "../middleware/notFound.middleware.js";
+
 import healthRoutes from "../routes/health.routes.js";
-import { errorHandler } from "../middleware/error.middleware.js";
-import { notFoundHandler } from "../middleware/notFound.middleware.js";
 
 const app: express.Application = express();
-
-app.use(express.json());
-
-app.use(requestLogger);
-app.use(healthRoutes);
 
 app.use(
   cors({
@@ -18,8 +16,16 @@ app.use(
   }),
 );
 
-app.use(notFoundHandler);
+app.use(express.json());
 
-app.use(errorHandler);
+app.use(requestLogger);
+
+app.use("/api", routes);
+
+// Unknown route
+app.use(notFoundMiddleware);
+
+// Global error handler
+app.use(errorMiddleware);
 
 export default app;
